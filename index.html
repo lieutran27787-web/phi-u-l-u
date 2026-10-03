@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Epic Adventure - Đánh Quái Phiêu Lưu</title>
+    <title>Jungle Adventure - Phiêu Lưu Rừng Xanh</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,7 +12,7 @@
         }
         body {
             margin: 0;
-            background-color: #12121c;
+            background-color: #3b82a6;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -24,29 +24,30 @@
         }
         #game-container {
             position: relative;
-            box-shadow: 0 0 50px rgba(255, 100, 0, 0.4);
-            border: 4px solid #3d2c1d;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+            border: 4px solid #1a1a2e;
             border-radius: 12px;
-            background: #1a1a24;
+            background: #a2ded0;
         }
         canvas {
             display: block;
-            cursor: crosshair;
         }
         .footer-info {
             margin-top: 14px;
             font-size: 14px;
-            color: #b0a8c0;
+            color: #e0e0e0;
             text-align: center;
             line-height: 1.5;
+            text-shadow: 1px 1px #000;
         }
         kbd {
-            background-color: #2a2a38;
-            border: 1px solid #4a4a60;
+            background-color: #222;
+            border: 1px solid #555;
             border-radius: 4px;
             padding: 2px 6px;
             font-family: monospace;
-            color: #ffaa00;
+            color: #00ffcc;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -56,8 +57,8 @@
         <canvas id="gameCanvas" width="960" height="540"></canvas>
     </div>
     <div class="footer-info">
-        ⚔️ <b>Điều khiển:</b> Dùng phím <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> hoặc <kbd>Mũi tên</kbd> để di chuyển<br>
-        🗡️️ Nhấn <kbd>SPACE</kbd> hoặc <kbd>Click Chuột Trái</kbd> để Tấn công quái vật | 🧪 Nhấn <kbd>E</kbd> để dùng Bình máu
+        🌿 <b>Điều khiển:</b> Dùng phím <kbd>←</kbd> <kbd>→</kbd> để di chuyển | <kbd>SPACE</kbd> hoặc <kbd>↑</kbd> để Nhảy<br>
+        ⚔️️ <b>Đánh quái:</b> Nhảy đạp lên đầu quái vật để tiêu diệt chúng | Thu thập trái tim, tiền xu và đá quý!
     </div>
 
 <script>
@@ -74,17 +75,17 @@
                 this.ctx.resume();
             }
         }
-        playSlash() {
+        playJump() {
             this.init();
             if (!this.ctx) return;
             try {
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.12);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(500, this.ctx.currentTime + 0.12);
                 
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
                 
                 osc.connect(gain);
@@ -93,23 +94,23 @@
                 osc.stop(this.ctx.currentTime + 0.12);
             } catch(e) {}
         }
-        playHit() {
+        playStomp() {
             this.init();
             if (!this.ctx) return;
             try {
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.15);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, this.ctx.currentTime + 0.1);
                 
-                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
                 
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
+                osc.stop(this.ctx.currentTime + 0.1);
             } catch(e) {}
         }
         playCoin() {
@@ -119,10 +120,10 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(900, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(1300, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(1200, this.ctx.currentTime + 0.08);
                 
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
                 
                 osc.connect(gain);
@@ -131,52 +132,115 @@
                 osc.stop(this.ctx.currentTime + 0.2);
             } catch(e) {}
         }
+        playDie() {
+            this.init();
+            if (!this.ctx) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(60, this.ctx.currentTime + 0.4);
+                
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            } catch(e) {}
+        }
     }
 
     const sfx = new SoundFX();
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let gameState = 'menu';
-    let currentWave = 1;
+    let gameState = 'start';
     let score = 0;
-    let gold = 0;
+    let coins = 0;
+    let gems = 0;
+    let hp = 3;
+
+    const GRAVITY = 0.65;
+    const WORLD_WIDTH = 3500;
+    const GROUND_Y = 440;
 
     let player = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        size: 32,
-        speed: 3.8,
-        maxHp: 100,
-        hp: 100,
-        attack: 25,
-        potions: 3,
-        facing: 'right',
-        isAttacking: false,
-        attackTimer: 0,
-        invulnerableTimer: 0
+        x: 100,
+        y: 200,
+        width: 34,
+        height: 42,
+        vx: 0,
+        vy: 0,
+        speed: 4.2,
+        jumpForce: -13.5,
+        onGround: false,
+        facing: 'right'
     };
 
+    let cameraX = 0;
     let keys = {};
+    let platforms = [];
     let enemies = [];
-    let particles = [];
-    let floatingTexts = [];
-    let items = [];
+    let collectibles = [];
+    let trees = [];
+
+    function initLevel() {
+        platforms = [];
+        enemies = [];
+        collectibles = [];
+        trees = [];
+
+        platforms.push({ x: 0, y: GROUND_Y, width: 850, height: 100, type: 'ground' });
+        platforms.push({ x: 960, y: GROUND_Y, width: 1100, height: 100, type: 'ground' });
+        platforms.push({ x: 2180, y: GROUND_Y, width: 1320, height: 100, type: 'ground' });
+
+        platforms.push({ x: 300, y: 320, width: 220, height: 35, type: 'platform' });
+        platforms.push({ x: 600, y: 240, width: 280, height: 35, type: 'platform' });
+        platforms.push({ x: 980, y: 310, width: 250, height: 35, type: 'platform' });
+        platforms.push({ x: 1300, y: 210, width: 300, height: 35, type: 'platform' });
+        platforms.push({ x: 1750, y: 290, width: 240, height: 35, type: 'platform' });
+        platforms.push({ x: 2250, y: 220, width: 280, height: 35, type: 'platform' });
+        platforms.push({ x: 2700, y: 300, width: 260, height: 35, type: 'platform' });
+
+        trees.push({ x: 150, y: GROUND_Y - 120 });
+        trees.push({ x: 1100, y: GROUND_Y - 120 });
+        trees.push({ x: 1950, y: GROUND_Y - 120 });
+        trees.push({ x: 2800, y: GROUND_Y - 120 });
+
+        enemies.push({ x: 650, y: GROUND_Y - 36, width: 36, height: 36, vx: -1.5, alive: true, type: 'bug' });
+        enemies.push({ x: 1150, y: 310 - 36, width: 36, height: 36, vx: 1.2, alive: true, type: 'bug' });
+        enemies.push({ x: 1450, y: GROUND_Y - 36, width: 36, height: 36, vx: -1.8, alive: true, type: 'plant' });
+        enemies.push({ x: 1900, y: GROUND_Y - 36, width: 36, height: 36, vx: -1.5, alive: true, type: 'bug' });
+        enemies.push({ x: 2400, y: 220 - 36, width: 36, height: 36, vx: 1.4, alive: true, type: 'bug' });
+        enemies.push({ x: 2850, y: GROUND_Y - 36, width: 36, height: 36, vx: -1.6, alive: true, type: 'plant' });
+
+        collectibles.push({ x: 380, y: 270, type: 'coin', collected: false });
+        collectibles.push({ x: 420, y: 270, type: 'coin', collected: false });
+        collectibles.push({ x: 700, y: 180, type: 'gem', collected: false });
+        collectibles.push({ x: 1050, y: 250, type: 'heart', collected: false });
+        collectibles.push({ x: 1420, y: 150, type: 'gem', collected: false });
+        collectibles.push({ x: 1850, y: 230, type: 'coin', collected: false });
+        collectibles.push({ x: 1890, y: 230, type: 'coin', collected: false });
+        collectibles.push({ x: 2380, y: 160, type: 'gem', collected: false });
+        collectibles.push({ x: 2820, y: 240, type: 'heart', collected: false });
+    }
 
     window.addEventListener("keydown", (e) => {
         keys[e.code] = true;
         sfx.init();
 
-        if (e.code === "Space") {
+        if (["Space", "ArrowUp"].includes(e.code)) {
             e.preventDefault();
-            if (gameState === 'playing') {
-                playerAttack();
-            } else if (gameState === 'gameover' || gameState === 'victory') {
-                resetGame();
+            if (gameState === 'playing' && player.onGround) {
+                player.vy = player.jumpForce;
+                player.onGround = false;
+                sfx.playJump();
+            } else if (gameState === 'start' || gameState === 'gameover' || gameState === 'victory') {
+                startGame();
             }
-        }
-        if (e.code === "KeyE" && gameState === 'playing') {
-            usePotion();
         }
     });
 
@@ -184,377 +248,323 @@
         keys[e.code] = false;
     });
 
-    canvas.addEventListener("mousedown", (e) => {
+    canvas.addEventListener("mousedown", () => {
         sfx.init();
-        if (gameState === 'menu') {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            if (mx >= canvas.width / 2 - 100 && mx <= canvas.width / 2 + 100 &&
-                my >= canvas.height / 2 + 40 && my <= canvas.height / 2 + 100) {
-                startGame();
-            }
-        } else if (gameState === 'playing') {
-            playerAttack();
-        } else if (gameState === 'gameover' || gameState === 'victory') {
-            resetGame();
+        if (gameState === 'start' || gameState === 'gameover' || gameState === 'victory') {
+            startGame();
+        } else if (gameState === 'playing' && player.onGround) {
+            player.vy = player.jumpForce;
+            player.onGround = false;
+            sfx.playJump();
         }
     });
 
     function startGame() {
         gameState = 'playing';
-        currentWave = 1;
         score = 0;
-        gold = 0;
-        player.hp = player.maxHp;
-        player.potions = 3;
-        player.x = canvas.width / 2;
-        player.y = canvas.height / 2;
-        enemies = [];
-        particles = [];
-        items = [];
-        spawnWave();
+        coins = 0;
+        gems = 0;
+        hp = 3;
+        player.x = 100;
+        player.y = 200;
+        player.vx = 0;
+        player.vy = 0;
+        initLevel();
     }
 
-    function resetGame() {
-        gameState = 'menu';
-    }
-
-    function spawnWave() {
-        enemies = [];
-        let enemyCount = 3 + currentWave * 2;
-        for (let i = 0; i < enemyCount; i++) {
-            let typeRand = Math.random();
-            let type = 'slime';
-            let hp = 40 + currentWave * 10;
-            let speed = 1.5 + Math.random() * 0.8;
-            let size = 28;
-            let color = '#00ff66';
-
-            if (currentWave >= 2 && typeRand > 0.5) {
-                type = 'goblin';
-                hp = 60 + currentWave * 15;
-                speed = 2.2;
-                size = 32;
-                color = '#ff9900';
-            }
-            if (currentWave >= 3 && typeRand > 0.85) {
-                type = 'orc';
-                hp = 120 + currentWave * 25;
-                speed = 1.1;
-                size = 42;
-                color = '#cc0000';
-            }
-
-            let ex, ey;
-            do {
-                ex = Math.random() * (canvas.width - 100) + 50;
-                ey = Math.random() * (canvas.height - 100) + 50;
-            } while (Math.hypot(ex - player.x, ey - player.y) < 200);
-
-            enemies.push({
-                x: ex, y: ey, size: size, hp: hp, maxHp: hp, speed: speed, type: type, color: color
-            });
-        }
-    }
-
-    function playerAttack() {
-        if (player.isAttacking) return;
-        player.isAttacking = true;
-        player.attackTimer = 12;
-        sfx.playSlash();
-
-        let attackRange = 55;
-        for (let e of enemies) {
-            let dist = Math.hypot(e.x - player.x, e.y - player.y);
-            if (dist < 75) {
-                e.hp -= player.attack;
-                createHitParticles(e.x, e.y);
-                addFloatingText("-" + player.attack, e.x, e.y - 20, "#ff3333");
-                sfx.playHit();
-
-                let angle = Math.atan2(e.y - player.y, e.x - player.x);
-                e.x += Math.cos(angle) * 25;
-                e.y += Math.sin(angle) * 25;
-            }
-        }
-    }
-
-    function usePotion() {
-        if (player.potions > 0 && player.hp < player.maxHp) {
-            player.potions--;
-            player.hp = Math.min(player.maxHp, player.hp + 50);
-            addFloatingText("+50 HP", player.x, player.y - 30, "#00ff66");
-            sfx.playCoin();
-        }
-    }
-
-    function addFloatingText(text, x, y, color) {
-        floatingTexts.push({ text, x, y, color, life: 35 });
-    }
-
-    function createHitParticles(x, y) {
-        for (let i = 0; i < 10; i++) {
-            particles.push({
-                x: x, y: y,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6,
-                size: Math.random() * 4 + 2,
-                color: "#ff3300",
-                life: 20
-            });
+    function hurtPlayer() {
+        hp--;
+        sfx.playDie();
+        player.y -= 30;
+        player.vy = -8;
+        if (hp <= 0) {
+            gameState = 'gameover';
         }
     }
 
     function update() {
         if (gameState !== 'playing') return;
 
-        let dx = 0;
-        let dy = 0;
-        if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
-        if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
-        if (keys['KeyA'] || keys['ArrowLeft']) { dx -= 1; player.facing = 'left'; }
-        if (keys['KeyD'] || keys['ArrowRight']) { dx += 1; player.facing = 'right'; }
-
-        if (dx !== 0 && dy !== 0) {
-            dx *= 0.7071;
-            dy *= 0.7071;
+        player.vx = 0;
+        if (keys['ArrowLeft'] || keys['KeyA']) {
+            player.vx = -player.speed;
+            player.facing = 'left';
+        }
+        if (keys['ArrowRight'] || keys['KeyD']) {
+            player.vx = player.speed;
+            player.facing = 'right';
         }
 
-        player.x += dx * player.speed;
-        player.y += dy * player.speed;
+        player.vy += GRAVITY;
 
-        player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
-        player.y = Math.max(50, Math.min(canvas.height - 20, player.y));
-
-        if (player.isAttacking) {
-            player.attackTimer--;
-            if (player.attackTimer <= 0) player.isAttacking = false;
-        }
-
-        if (player.invulnerableTimer > 0) {
-            player.invulnerableTimer--;
-        }
-
-        for (let i = particles.length - 1; i >= 0; i--) {
-            let p = particles[i];
-            p.x += p.vx; p.y += p.vy; p.life--;
-            if (p.life <= 0) particles.splice(i, 1);
-        }
-
-        for (let i = floatingTexts.length - 1; i >= 0; i--) {
-            let ft = floatingTexts[i];
-            ft.y -= 1; ft.life--;
-            if (ft.life <= 0) floatingTexts.splice(i, 1);
-        }
-
-        for (let i = enemies.length - 1; i >= 0; i--) {
-            let e = enemies[i];
-            let angle = Math.atan2(player.y - e.y, player.x - e.x);
-            e.x += Math.cos(angle) * e.speed;
-            e.y += Math.sin(angle) * e.speed;
-
-            let dist = Math.hypot(player.x - e.x, player.y - e.y);
-            if (dist < player.size / 2 + e.size / 2) {
-                if (player.invulnerableTimer === 0) {
-                    let dmg = e.type === 'orc' ? 25 : (e.type === 'goblin' ? 15 : 10);
-                    player.hp -= dmg;
-                    player.invulnerableTimer = 45;
-                    sfx.playHit();
-                    addFloatingText("-" + dmg, player.x, player.y - 25, "#ff0000");
-
-                    if (player.hp <= 0) {
-                        gameState = 'gameover';
-                    }
-                }
-            }
-
-            if (e.hp <= 0) {
-                score += e.type === 'orc' ? 50 : (e.type === 'goblin' ? 30 : 15);
-                gold += Math.floor(Math.random() * 5) + 2;
-                
-                if (Math.random() > 0.6) {
-                    items.push({ x: e.x, y: e.y, type: 'potion' });
-                }
-
-                enemies.splice(i, 1);
+        player.x += player.vx;
+        for (let p of platforms) {
+            if (checkCollision(player, { x: p.x, y: p.y, width: p.width, height: p.height })) {
+                if (player.vx > 0) player.x = p.x - player.width;
+                else if (player.vx < 0) player.x = p.x + p.width;
             }
         }
 
-        for (let i = items.length - 1; i >= 0; i--) {
-            let it = items[i];
-            if (Math.hypot(player.x - it.x, player.y - it.y) < 30) {
-                player.potions++;
+        player.onGround = false;
+        player.y += player.vy;
+        for (let p of platforms) {
+            if (checkCollision(player, { x: p.x, y: p.y, width: p.width, height: p.height })) {
+                if (player.vy > 0) {
+                    player.y = p.y - player.height;
+                    player.vy = 0;
+                    player.onGround = true;
+                } else if (player.vy < 0) {
+                    player.y = p.y + p.height;
+                    player.vy = 0;
+                }
+            }
+        }
+
+        cameraX = player.x - 300;
+        cameraX = Math.max(0, Math.min(WORLD_WIDTH - canvas.width, cameraX));
+
+        if (player.y > canvas.height + 50) {
+            hurtPlayer();
+            if (gameState === 'playing') {
+                player.x = Math.max(50, cameraX + 50);
+                player.y = 100;
+            }
+        }
+
+        for (let e of enemies) {
+            if (!e.alive) continue;
+            e.x += e.vx;
+
+            for (let p of platforms) {
+                if (checkCollision(e, { x: p.x, y: p.y, width: p.width, height: p.height })) {
+                    e.vx *= -1;
+                }
+            }
+
+            if (checkCollision(player, e)) {
+                if (player.vy > 0 && player.y + player.height - player.vy <= e.y + 15) {
+                    e.alive = false;
+                    player.vy = -9;
+                    score += 200;
+                    sfx.playStomp();
+                } else {
+                    hurtPlayer();
+                }
+            }
+        }
+
+        for (let c of collectibles) {
+            if (!c.collected && checkCollision(player, { x: c.x - 12, y: c.y - 12, width: 24, height: 24 })) {
+                c.collected = true;
                 sfx.playCoin();
-                addFloatingText("+1 Potion", player.x, player.y - 30, "#00ffcc");
-                items.splice(i, 1);
+                if (c.type === 'coin') { coins++; score += 100; }
+                else if (c.type === 'gem') { gems++; score += 500; }
+                else if (c.type === 'heart') { hp = Math.min(5, hp + 1); score += 300; }
             }
         }
 
-        if (enemies.length === 0) {
-            currentWave++;
-            if (currentWave > 5) {
-                gameState = 'victory';
-            } else {
-                spawnWave();
-                addFloatingText(`WAVE ${currentWave} START!`, canvas.width / 2, 100, "#ffcc00");
-            }
+        if (player.x >= WORLD_WIDTH - 150) {
+            gameState = 'victory';
         }
+    }
+
+    function checkCollision(r1, r2) {
+        return r1.x < r2.x + r2.width &&
+               r1.x + r1.width > r2.x &&
+               r1.y < r2.y + r2.height &&
+               r1.y + r1.height > r2.y;
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = "#161622";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = "#222233";
-        ctx.lineWidth = 1;
-        for (let x = 0; x < canvas.width; x += 60) {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-        }
-        for (let y = 0; y < canvas.height; y += 60) {
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-        }
-
-        if (gameState === 'menu') {
-            drawMenu();
+        if (gameState === 'start') {
+            drawStartScreen();
             return;
         }
 
-        for (let it of items) {
-            ctx.fillStyle = "#ff0066";
-            ctx.beginPath();
-            ctx.arc(it.x, it.y, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "12px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("🧪", it.x, it.y + 4);
-        }
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyGrad.addColorStop(0, "#4ba3e3");
+        skyGrad.addColorStop(1, "#a2ded0");
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (let e of enemies) {
-            ctx.fillStyle = e.color;
-            ctx.beginPath();
-            ctx.arc(e.x, e.y, e.size / 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.fillRect(200 - cameraX * 0.3, 60, 120, 35);
+        ctx.fillRect(700 - cameraX * 0.3, 90, 150, 35);
+        ctx.fillRect(1300 - cameraX * 0.3, 50, 130, 35);
+        ctx.fillRect(2100 - cameraX * 0.3, 80, 160, 35);
 
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(e.x - 6, e.y - 6, 4, 4);
-            ctx.fillRect(e.x + 2, e.y - 6, 4, 4);
-
-            ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(e.x - 20, e.y - e.size / 2 - 12, 40, 6);
-            ctx.fillStyle = "#ff3333";
-            ctx.fillRect(e.x - 20, e.y - e.size / 2 - 12, (40 * e.hp) / e.maxHp, 6);
-        }
-
-        if (player.invulnerableTimer % 6 < 3) {
-            ctx.fillStyle = "#3399ff";
-            ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
-
-            if (player.isAttacking) {
-                ctx.fillStyle = "#ffff00";
-                let swordX = player.facing === 'right' ? player.x + 20 : player.x - 45;
-                ctx.fillRect(swordX, player.y - 12, 25, 24);
+        for (let t of trees) {
+            let tx = t.x - cameraX;
+            if (tx > -150 && tx < canvas.width + 150) {
+                ctx.fillStyle = "#8b5a2b";
+                ctx.fillRect(tx + 15, t.y + 30, 20, 90);
+                ctx.fillStyle = "#2e8b57";
+                ctx.beginPath();
+                ctx.arc(tx + 25, t.y + 25, 35, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
-        for (let p of particles) {
-            ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
+        for (let p of platforms) {
+            let dx = p.x - cameraX;
+            if (dx > -200 && dx < canvas.width + 200) {
+                ctx.fillStyle = "#8c5830";
+                ctx.fillRect(dx, p.y + 12, p.width, p.height - 12);
+                ctx.fillStyle = "#43b326";
+                ctx.fillRect(dx, p.y, p.width, 16);
+                ctx.fillStyle = "#2d8515";
+                for (let gx = dx; gx < dx + p.width; gx += 16) {
+                    ctx.beginPath();
+                    ctx.moveTo(gx, p.y);
+                    ctx.lineTo(gx + 8, p.y - 8);
+                    ctx.lineTo(gx + 16, p.y);
+                    ctx.fill();
+                }
+            }
         }
 
-        for (let ft of floatingTexts) {
-            ctx.fillStyle = ft.color;
-            ctx.font = "bold 16px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(ft.text, ft.x, ft.y);
+        for (let c of collectibles) {
+            if (c.collected) continue;
+            let cx = c.x - cameraX;
+            if (cx > -50 && cx < canvas.width + 50) {
+                if (c.type === 'coin') {
+                    ctx.fillStyle = "#ffd700";
+                    ctx.beginPath(); ctx.arc(cx, c.y, 11, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = "#b8860b"; ctx.lineWidth = 2; ctx.stroke();
+                } else if (c.type === 'gem') {
+                    ctx.fillStyle = "#ff00ff";
+                    ctx.beginPath();
+                    ctx.moveTo(cx, c.y - 12);
+                    ctx.lineTo(cx + 10, c.y);
+                    ctx.lineTo(cx, c.y + 12);
+                    ctx.lineTo(cx - 10, c.y);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (c.type === 'heart') {
+                    ctx.fillStyle = "#ff3344";
+                    ctx.font = "20px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText("❤️", cx, c.y + 7);
+                }
+            }
         }
 
-        ctx.fillStyle = "rgba(10, 10, 20, 0.8)";
-        ctx.fillRect(0, 0, canvas.width, 50);
-        ctx.strokeStyle = "#3d2c1d";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(0, 0, canvas.width, 50);
+        for (let e of enemies) {
+            if (!e.alive) continue;
+            let ex = e.x - cameraX;
+            if (ex > -50 && ex < canvas.width + 50) {
+                if (e.type === 'bug') {
+                    ctx.fillStyle = "#ff3333";
+                    ctx.beginPath(); ctx.arc(ex + 18, e.y + 18, 16, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(ex + 8, e.y + 8, 6, 8);
+                    ctx.fillRect(ex + 20, e.y + 8, 6, 8);
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(ex + 10, e.y + 11, 3, 4);
+                    ctx.fillRect(ex + 22, e.y + 11, 3, 4);
+                } else {
+                    ctx.fillStyle = "#cc0000";
+                    ctx.fillRect(ex + 6, e.y + 12, 24, 24);
+                    ctx.fillStyle = "#00ff66";
+                    ctx.fillRect(ex + 12, e.y, 14, 14);
+                }
+            }
+        }
 
-        ctx.fillStyle = "#444";
-        ctx.fillRect(20, 15, 180, 20);
-        ctx.fillStyle = "#00ff66";
-        ctx.fillRect(20, 15, (180 * Math.max(0, player.hp)) / player.maxHp, 20);
+        let flagX = WORLD_WIDTH - 150 - cameraX;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(flagX, GROUND_Y - 220, 8, 220);
+        ctx.fillStyle = "#ffd700";
+        ctx.beginPath(); ctx.arc(flagX + 4, GROUND_Y - 220, 12, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ff3333";
+        ctx.beginPath();
+        ctx.moveTo(flagX + 8, GROUND_Y - 210);
+        ctx.lineTo(flagX + 65, GROUND_Y - 185);
+        ctx.lineTo(flagX + 8, GROUND_Y - 160);
+        ctx.closePath();
+        ctx.fill();
+
+        let px = player.x - cameraX;
+        ctx.fillStyle = "#ffcc00";
+        ctx.fillRect(px + 4, player.y + 6, 26, 20);
+        ctx.fillStyle = "#0066cc";
+        ctx.fillRect(px + 6, player.y + 26, 22, 16);
+        ctx.fillStyle = "#ffcc99";
+        ctx.fillRect(player.facing === 'right' ? px + 18 : px + 4, player.y + 10, 12, 12);
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.fillRect(15, 15, 340, 45);
         ctx.strokeStyle = "#ffffff";
-        ctx.strokeRect(20, 15, 180, 20);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(`HP: ${player.hp} / ${player.maxHp}`, 110, 30);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(15, 15, 340, 45);
 
+        ctx.fillStyle = "#ffffff";
         ctx.font = "bold 16px Arial";
         ctx.textAlign = "left";
-        ctx.fillStyle = "#ffaa00";
-        ctx.fillText(`⚔️ Wave: ${currentWave} / 5`, 230, 30);
-        ctx.fillStyle = "#00ccff";
-        ctx.fillText(`💰 Vàng: ${gold}`, 390, 30);
-        ctx.fillStyle = "#ff33cc";
-        ctx.fillText(`🧪 Bình máu (E): ${player.potions}`, 510, 30);
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(`🏆 Điểm: ${score}`, 700, 30);
+        ctx.fillText(`❤️ HP: ${"❤️".repeat(hp)}`, 30, 43);
+        ctx.fillText(`🪙 ${coins}`, 150, 43);
+        ctx.fillText(`💎 ${gems}`, 220, 43);
+        ctx.fillText(`🏆 ${score}`, 280, 43);
 
         if (gameState === 'gameover' || gameState === 'victory') {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.textAlign = "center";
             
             if (gameState === 'gameover') {
                 ctx.fillStyle = "#ff3333";
-                ctx.font = "bold 48px Arial";
-                ctx.fillText("BẠN ĐÃ HY SINH!", canvas.width / 2, canvas.height / 2 - 30);
+                ctx.font = "bold 44px Arial";
+                ctx.fillText("BẠN ĐÃ THẤT BẠI!", canvas.width / 2, canvas.height / 2 - 25);
             } else {
                 ctx.fillStyle = "#00ff66";
-                ctx.font = "bold 48px Arial";
-                ctx.fillText("CHIẾN THẮNG HOÀNH TRÁNG!", canvas.width / 2, canvas.height / 2 - 30);
+                ctx.font = "bold 44px Arial";
+                ctx.fillText("HOÀN THÀNH PHIÊU LƯU!", canvas.width / 2, canvas.height / 2 - 25);
             }
 
             ctx.fillStyle = "#ffffff";
             ctx.font = "20px Arial";
-            ctx.fillText(`Tổng điểm đạt được: ${score} | Vàng thu thập: ${gold}`, canvas.width / 2, canvas.height / 2 + 20);
+            ctx.fillText(`Tổng điểm: ${score} | Tiền vàng: ${coins} | Đá quý: ${gems}`, canvas.width / 2, canvas.height / 2 + 20);
             ctx.font = "16px Arial";
-            ctx.fillStyle = "#ffaa00";
+            ctx.fillStyle = "#ffcc00";
             ctx.fillText("Nhấn SPACE hoặc Click chuột để chơi lại", canvas.width / 2, canvas.height / 2 + 70);
         }
     }
 
-    function drawMenu() {
+    function drawStartScreen() {
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyGrad.addColorStop(0, "#4ba3e3");
+        skyGrad.addColorStop(1, "#a2ded0");
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         ctx.textAlign = "center";
-        ctx.fillStyle = "#ff6600";
-        ctx.font = "bold 56px Arial";
-        ctx.shadowColor = "#ff0000";
-        ctx.shadowBlur = 20;
-        ctx.fillText("EPIC DUNGEON ADVENTURE", canvas.width / 2, 160);
+        ctx.fillStyle = "#228b22";
+        ctx.font = "bold 52px Arial";
+        ctx.shadowColor = "#000";
+        ctx.shadowBlur = 10;
+        ctx.fillText("JUNGLE ADVENTURE", canvas.width / 2, 160);
         ctx.shadowBlur = 0;
 
-        ctx.fillStyle = "#b0a8c0";
-        ctx.font = "18px Arial";
-        ctx.fillText("Khám phá hầm ngục bí ẩn, tiêu diệt quái vật và trở thành chiến binh huyền thoại!", canvas.width / 2, 210);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "20px Arial";
+        ctx.fillText("Khám phá khu rừng nhiệt đới, thu thập kho báu và tiêu diệt quái vật!", canvas.width / 2, 215);
 
-        ctx.fillStyle = "#ff4400";
-        ctx.fillRect(canvas.width / 2 - 110, canvas.height / 2 + 30, 220, 65);
+        ctx.fillStyle = "#2ecc71";
+        ctx.fillRect(canvas.width / 2 - 120, 270, 240, 65);
         ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(canvas.width / 2 - 110, canvas.height / 2 + 30, 220, 65);
+        ctx.lineWidth = 4;
+        ctx.strokeRect(canvas.width / 2 - 120, 270, 240, 65);
 
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 24px Arial";
-        ctx.fillText("BẮT ĐẦU CHƠI", canvas.width / 2, canvas.height / 2 + 72);
+        ctx.fillText("BẮT ĐẦU CHƠI", canvas.width / 2, 312);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "15px Arial";
+        ctx.fillText("Nhấn SPACE hoặc Click chuột để bắt đầu", canvas.width / 2, 380);
+        ctx.textAlign = "left";
     }
 
     function loop() {
